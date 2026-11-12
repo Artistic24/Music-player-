@@ -1,0 +1,26 @@
+name: Build Android APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'VIBE-Music-Player/**'
+      - '.github/workflows/**'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build debug APK
+        working-directory: VIBE-Music-Player
+        run: gradle --no-daemon assembleDebug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: VIBE-Music-Player-debug-apk
+          path: VIBE-Music-Player/app/build/outputs/apk/debug/*.apk
