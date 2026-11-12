@@ -1,7 +1,14 @@
 # VIBE Music Player
 
-Android-only native music and video player built with Kotlin, Jetpack Compose and AndroidX Media3.
+Native Android music and video player built with Kotlin, Jetpack Compose and AndroidX Media3.
 
-The source archive is in `releases`/repository assets. See `VIBE-Music-Player/README.md` for build instructions.
+## Source code
+The complete Android Studio project is in [VIBE-Music-Player/](./VIBE-Music-Player/). Open that folder in Android Studio.
 
-> Android APK builds are produced by GitHub Actions. This Android project does not produce a Windows `.exe`; a Windows desktop port would be a separate application target.
+## Build an APK
+A GitHub Actions workflow builds and tests the Android project on pushes to `main` and on manual dispatch. Download the APK from the successful workflow run's **Artifacts** section.
+
+## Platform support
+This repository currently contains the Android app only. It does not produce a Windows `.exe`; a Windows desktop version would require a separate desktop app target and platform-specific media integration.
+
+See [the Android project README](./VIBE-Music-Player/README.md) for build steps and current feature limitations.
