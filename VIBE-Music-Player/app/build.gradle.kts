@@ -15,6 +15,14 @@ android {
         jvmTarget = "17"
     }
     buildFeatures { compose = true }
+    buildTypes {
+        getByName("release") {
+            // Debug-key signing makes this release variant installable for sideload testing.
+            // Replace with a private release keystore before Play Store distribution.
+            signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = false
+        }
+    }
     packaging { resources.excludes += "/META-INF/{AL2.0,LGPL2.1}" }
 }
 dependencies {
