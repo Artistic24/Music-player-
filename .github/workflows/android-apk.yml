@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APKs
 on:
   workflow_dispatch:
   push:
@@ -15,13 +15,19 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: gradle/gradle-build-action@v3
+      - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.9'
-      - name: Build debug APK
+      - name: Run unit tests and build APKs
         working-directory: VIBE-Music-Player
-        run: gradle --no-daemon testDebugUnitTest assembleDebug
-      - name: Upload APK
+        run: gradle --no-daemon testDebugUnitTest assembleDebug assembleRelease
+      - name: Upload release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: VIBE-Music-Player-release-apk
+          path: VIBE-Music-Player/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+      - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
           name: VIBE-Music-Player-debug-apk
