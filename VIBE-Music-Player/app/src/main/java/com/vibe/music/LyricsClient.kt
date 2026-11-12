@@ -19,10 +19,21 @@ object LyricsClient {
         return try { if (conn.responseCode !in 200..299) return null; val j=JSONObject(conn.inputStream.bufferedReader().use { it.readText() }); LyricsResult(j.optString("syncedLyrics").takeIf { it.isNotBlank() && it!="null" }, j.optString("plainLyrics").takeIf { it.isNotBlank() && it!="null" }) } finally { conn.disconnect() }
     }
     fun parseLrc(raw: String): List<LyricLine> {
-        val pattern = Regex("\\[(\\d{1,2}):(\\d{2})(?:\\.(\\d{1,3}))?]([\\s\\S]*)")
-        return raw.lineSequence().flatMap { line -> pattern.findAll(line).mapNotNull { m ->
-            val mins=m.groupValues[1].toLong(); val secs=m.groupValues[2].toLong(); val frac=m.groupValues[3].padEnd(3,'0').take(3).toLongOrNull() ?: 0L
-            LyricLine((mins*60+secs)*1000+frac, m.groupValues[4].trim())
-        } }.sortedBy { it.timeMs }.toList()
+        val timestamp = Regex("\\[(\\d{1,2}):(\\d{2})(?:\\.(\\d{1,3}))?]")
+        return raw.lineSequence().flatMap { line ->
+            val matches = timestamp.findAll(line).toList()
+            if (matches.isEmpty()) emptySequence()
+            else {
+                // For repeated timestamps, every timestamp on the line shares
+                // the lyric text that follows the final timestamp tag.
+                val lyricText = line.substring(matches.last().range.last + 1).trim()
+                matches.asSequence().map { match ->
+                    val minutes = match.groupValues[1].toLong()
+                    val seconds = match.groupValues[2].toLong()
+                    val fraction = match.groupValues[3].padEnd(3, '0').take(3).toLongOrNull() ?: 0L
+                    LyricLine((minutes * 60 + seconds) * 1000 + fraction, lyricText)
+                }
+            }
+        }.sortedBy { it.timeMs }.toList()
     }
 }
