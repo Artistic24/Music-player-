@@ -15,12 +15,15 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/gradle-build-action@v3
+        with:
+          gradle-version: '8.9'
       - name: Build debug APK
         working-directory: VIBE-Music-Player
-        run: gradle --no-daemon assembleDebug
+        run: gradle --no-daemon testDebugUnitTest assembleDebug
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: VIBE-Music-Player-debug-apk
           path: VIBE-Music-Player/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
