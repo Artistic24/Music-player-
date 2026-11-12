@@ -1,6 +1,7 @@
 package com.vibe.music
 
 import android.content.Context
+import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.media.MediaMuxer
@@ -25,7 +26,7 @@ object OfflineAudioExtractor {
             extractor.selectTrack(sourceTrack)
             muxer = MediaMuxer(out.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
             val destTrack = muxer.addTrack(format!!); muxer.start()
-            val buffer = ByteBuffer.allocate(1024 * 1024); val info = MediaMuxer.BufferInfo()
+            val buffer = ByteBuffer.allocate(1024 * 1024); val info = MediaCodec.BufferInfo()
             while (true) {
                 buffer.clear(); val size = extractor.readSampleData(buffer, 0); if (size < 0) break
                 info.offset = 0; info.size = size; info.presentationTimeUs = extractor.sampleTime; info.flags = extractor.sampleFlags
