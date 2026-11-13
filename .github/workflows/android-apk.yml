@@ -1,4 +1,4 @@
-name: Build Android APKs
+name: VIBE Player Android Release
 on:
   workflow_dispatch:
   push:
@@ -23,11 +23,14 @@ jobs:
       - name: Run unit tests and build APKs
         working-directory: VIBE-Music-Player
         run: gradle --no-daemon testDebugUnitTest assembleDebug assembleRelease
-      - name: Upload release APK
+      - name: Name release APK
+        working-directory: VIBE-Music-Player
+        run: cp app/build/outputs/apk/release/app-release.apk "VIBE Player.apk"
+      - name: Upload VIBE Player APK
         uses: actions/upload-artifact@v4
         with:
-          name: VIBE-Music-Player-release-apk
-          path: VIBE-Music-Player/app/build/outputs/apk/release/*.apk
+          name: VIBE-Player-release-apk
+          path: VIBE-Music-Player/VIBE Player.apk
           if-no-files-found: error
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
@@ -38,9 +41,9 @@ jobs:
       - name: Attach release APK to VIBE GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: 1.0.1
-          name: VIBE
-          files: VIBE-Music-Player/app/build/outputs/apk/release/*.apk
+          tag_name: vibe-player-1.0.2
+          name: VIBE Player
+          files: VIBE-Music-Player/VIBE Player.apk
           overwrite_files: true
           fail_on_unmatched_files: true
         env:
