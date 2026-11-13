@@ -49,10 +49,14 @@ private fun vibePalette(theme:String):List<Color> = when(theme){
 @Composable
 fun VibePlayerScreen(
  theme:String,playerStyle:String,player:androidx.media3.session.MediaController?,track:Track?,position:Long,duration:Long,playing:Boolean,shuffle:Boolean,repeat:Int,audioOnly:Boolean,lyrics:String,loading:Boolean,
- loadLyrics:()->Unit,seek:(Long)->Unit,previous:()->Unit,next:()->Unit,toggle:()->Unit,toggleShuffle:()->Unit,toggleRepeat:()->Unit,toggleAudio:()->Unit,close:()->Unit
+ loadLyrics:()->Unit,seek:(Long)->Unit,previous:()->Unit,next:()->Unit,toggle:()->Unit,toggleShuffle:()->Unit,toggleRepeat:()->Unit,toggleAudio:()->Unit,close:()->Unit,
+ isFavourite:Boolean,toggleFavourite:()->Unit,addToPlaylist:()->Unit,startSleepTimer:(Int)->Unit
 ){
  var lyricsPage by remember{mutableStateOf(false)}
  var drag by remember{mutableFloatStateOf(0f)}
+ var sleepDialog by remember{mutableStateOf(false)}
+ var sleepMinutes by remember{mutableStateOf("30")}
+ var detailsDialog by remember{mutableStateOf(false)}
  val lines=remember(lyrics){LyricsClient.parseLrc(lyrics)}
  val active=lines.indexOfLast{it.timeMs<=position}.coerceAtLeast(0)
  val palette=vibePalette(theme)
@@ -86,7 +90,7 @@ fun VibePlayerScreen(
     }
     Text(track?.title?:"Choose a song",color=Color.White,fontSize=22.sp,fontWeight=FontWeight.Bold,maxLines=1,overflow=TextOverflow.Ellipsis)
     Text(track?.artist.orEmpty(),color=Color.White.copy(alpha=.72f),fontSize=15.sp)
-    Row(Modifier.fillMaxWidth().padding(top=12.dp),horizontalArrangement=Arrangement.SpaceEvenly){IconButton(onClick={}){Icon(Icons.Default.FavoriteBorder,"Favourite",tint=Color.White)};IconButton(onClick={}){Icon(Icons.Default.Add,"Add",tint=Color.White)};IconButton(onClick={}){Icon(Icons.Default.Timer,"Sleep timer",tint=Color.White)};IconButton(onClick={lyricsPage=true;if(lyrics.isBlank())loadLyrics()}){Icon(Icons.Default.Lyrics,"Lyrics",tint=Color.White)};IconButton(onClick={}){Icon(Icons.Default.MoreVert,"More",tint=Color.White)}}
+    Row(Modifier.fillMaxWidth().padding(top=12.dp),horizontalArrangement=Arrangement.SpaceEvenly){IconButton(onClick=toggleFavourite){Icon(if(isFavourite)Icons.Default.Favorite else Icons.Default.FavoriteBorder,"Favourite",tint=if(isFavourite)VibePink else Color.White)};IconButton(onClick=addToPlaylist){Icon(Icons.Default.Add,"Add to playlist",tint=Color.White)};IconButton(onClick={sleepDialog=true}){Icon(Icons.Default.Timer,"Sleep timer",tint=Color.White)};IconButton(onClick={lyricsPage=true;if(lyrics.isBlank())loadLyrics()}){Icon(Icons.Default.Lyrics,"Lyrics",tint=Color.White)};IconButton(onClick={detailsDialog=true}){Icon(Icons.Default.MoreVert,"Song details",tint=Color.White)}}
     Slider(value=if(duration>0)(position.toFloat()/duration).coerceIn(0f,1f)else 0f,onValueChange={seek((it*duration).toLong())},colors=SliderDefaults.colors(thumbColor=Color.White,activeTrackColor=Color.White,inactiveTrackColor=Color.White.copy(alpha=.25f)))
     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){Text(timeLabel(position),color=Color.White,fontSize=11.sp);Text(timeLabel(duration),color=Color.White,fontSize=11.sp)}
     Row(Modifier.fillMaxWidth().padding(top=14.dp,bottom=28.dp),horizontalArrangement=Arrangement.SpaceEvenly,verticalAlignment=Alignment.CenterVertically){
@@ -113,6 +117,9 @@ fun VibePlayerScreen(
    }
   }
  }
+ if(sleepDialog) AlertDialog(onDismissRequest={sleepDialog=false},title={Text("Sleep timer")},text={Column{Text("Pause playback after how many minutes?");OutlinedTextField(value=sleepMinutes,onValueChange={sleepMinutes=it.filter(Char::isDigit).take(3)},singleLine=true,label={Text("Minutes")})}},confirmButton={TextButton(onClick={sleepMinutes.toIntOrNull()?.takeIf{it in 1..999}?.let(startSleepTimer);sleepDialog=false}){Text("Start timer")}},dismissButton={TextButton(onClick={sleepDialog=false}){Text("Cancel")}},containerColor=Color(0xFF21101F),titleContentColor=Color.White,textContentColor=Color.White)
+ if(detailsDialog) AlertDialog(onDismissRequest={detailsDialog=false},title={Text("Song information")},text={Column{Text(track?.title?: "Unknown title");Text(track?.artist?: "Unknown artist");Text("Duration: ${timeLabel(duration)}")}},confirmButton={TextButton(onClick={detailsDialog=false}){Text("Close")}},containerColor=Color(0xFF21101F),titleContentColor=Color.White,textContentColor=Color.White)
+
 }
 
 
