@@ -1,6 +1,12 @@
 package com.vibe.music
 
-import android.graphics.Bitmap\nimport android.media.MediaMetadataRetriever\nimport androidx.compose.foundation.*\nimport androidx.compose.ui.graphics.asImageBitmap\nimport androidx.compose.ui.layout.ContentScale\nimport kotlinx.coroutines.Dispatchers\nimport kotlinx.coroutines.withContext
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
+import androidx.compose.foundation.*
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -47,6 +53,19 @@ fun VibePlayerScreen(
  val lines=remember(lyrics){LyricsClient.parseLrc(lyrics)}
  val active=lines.indexOfLast{it.timeMs<=position}.coerceAtLeast(0)
  val palette=vibePalette(theme)
+ val context=LocalContext.current
+ val artwork by produceState<Bitmap?>(null,track?.uri){
+  value=withContext(Dispatchers.IO){
+   runCatching {
+    val uri=track?.uri ?: return@runCatching null
+    val retriever=MediaMetadataRetriever()
+    try {
+     retriever.setDataSource(context,uri)
+     retriever.embeddedPicture?.let{bytes->android.graphics.BitmapFactory.decodeByteArray(bytes,0,bytes.size)}
+    } finally { retriever.release() }
+   }.getOrNull()
+  }
+ }
  Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(palette[0].copy(alpha=.9f),palette[1],palette[2]))).pointerInput(lyricsPage,lyrics){detectHorizontalDragGestures(onHorizontalDrag={_,amount->drag+=amount},onDragEnd={if(drag < -45){lyricsPage=true;if(lyrics.isBlank())loadLyrics()} else if(drag>45)lyricsPage=false;drag=0f})}){
   if(!lyricsPage){
    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal=18.dp),horizontalAlignment=Alignment.CenterHorizontally){
