@@ -109,35 +109,3 @@ fun VibePlayerScreen(
  }
 }
 
-@Composable
-fun VibeProfilePage(themeName:String,playerStyle:String,onTheme:(String)->Unit,onStyle:(String)->Unit,onFix:()->Unit,onInfo:()->Unit){
- val themes=listOf("Muso Style","Fiery Rhythms","Radiant Nights","Blue Ocean","Rainforest","Green Vibe")
- val styles=listOf("Vibrant Splash","Colorful Frenzy","Rose Vinyl","Petal Groove","Forest Voice","Winter Cottage")
- Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal=18.dp)){
-  Text("Me",color=Color.White,fontSize=27.sp,fontWeight=FontWeight.Bold)
-  Text("Personalization",color=VibeMuted,fontSize=14.sp)
-  Spacer(Modifier.height(16.dp))
-  Row(horizontalArrangement=Arrangement.spacedBy(18.dp)){listOf("Player Style","Cool Mode","Theme","Lock screen").forEach{Text(it,color=if(it=="Theme")Color.White else VibeMuted,fontWeight=if(it=="Theme")FontWeight.Bold else FontWeight.Normal,fontSize=14.sp)}} 
-  Text("Themes",color=Color.White,fontSize=21.sp,fontWeight=FontWeight.Bold,modifier=Modifier.padding(top=18.dp,bottom=10.dp))
-  themes.chunked(2).forEach{pair->Row(horizontalArrangement=Arrangement.spacedBy(12.dp)){pair.forEach{name->val colors=vibePalette(name);Column(Modifier.weight(1f).clickable{onTheme(name)}.clip(RoundedCornerShape(17.dp)).background(Brush.linearGradient(colors)).border(if(themeName==name)2.dp else 1.dp,if(themeName==name)Color.White else Color.White.copy(alpha=.25f),RoundedCornerShape(17.dp)).padding(11.dp)){Box(Modifier.fillMaxWidth().height(82.dp).clip(RoundedCornerShape(11.dp)).background(Color.Black.copy(alpha=.45f)),contentAlignment=Alignment.Center){Column(horizontalAlignment=Alignment.CenterHorizontally){Icon(Icons.Default.Album,null,tint=colors[0],modifier=Modifier.size(40.dp));Text("VIBE  •  Songs  •  Playlist",color=Color.White,fontSize=8.sp)}};Text(name,color=Color.White,fontWeight=FontWeight.Bold,modifier=Modifier.padding(top=8.dp));Text(if(themeName==name)"✓ Selected" else "Tap to apply",color=Color.White.copy(alpha=.75f),fontSize=10.sp)}};if(pair.size==1)Spacer(Modifier.weight(1f))}}
-  Text("Player styles",color=Color.White,fontSize=21.sp,fontWeight=FontWeight.Bold,modifier=Modifier.padding(top=22.dp,bottom=10.dp))
-  styles.chunked(2).forEach{pair->Row(horizontalArrangement=Arrangement.spacedBy(12.dp)){pair.forEachIndexed{index,name->val colors=listOf(listOf(Color(0xFFFFA75B),Color(0xFFFF168A),Color(0xFF39105B)),listOf(Color(0xFF42C8FF),Color(0xFFB51AFF),Color(0xFF241044)),listOf(Color(0xFFFFA4B6),Color(0xFFFF244F),Color(0xFF391020)),listOf(Color(0xFFFFD0D7),Color(0xFFEF376C),Color(0xFF3C102A)),listOf(Color(0xFF5EE58B),Color(0xFF126B45),Color(0xFF09251C)),listOf(Color(0xFFB9E8FF),Color(0xFF337CBF),Color(0xFF081D39)))[styles.indexOf(name)];Column(Modifier.weight(1f).clickable{onStyle(name)}.clip(RoundedCornerShape(17.dp)).background(Brush.linearGradient(colors)).padding(12.dp)){Box(Modifier.fillMaxWidth().height(110.dp),contentAlignment=Alignment.Center){Icon(Icons.Default.Album,null,tint=Color.White,modifier=Modifier.size(75.dp))};Text(name,color=Color.White,fontWeight=FontWeight.Bold);Text(if(playerStyle==name)"✓ Selected" else "Tap to select",color=Color.White.copy(alpha=.75f),fontSize=10.sp)}};if(pair.size==1)Spacer(Modifier.weight(1f))}}
-  Spacer(Modifier.height(20.dp))
-  listOf("Fix Song Info" to Icons.Default.Build,"MP3 Converter" to Icons.Default.MusicVideo,"Hide & Scan Songs" to Icons.Default.VisibilityOff,"Music Pet" to Icons.Default.Pets).forEach{(label,ic)->Row(Modifier.fillMaxWidth().padding(vertical=5.dp).clip(RoundedCornerShape(14.dp)).background(VibePanel).clickable{if(label=="Fix Song Info")onFix()else onInfo()}.padding(15.dp),verticalAlignment=Alignment.CenterVertically){Icon(ic,null,tint=VibePink);Spacer(Modifier.width(13.dp));Text(label,Modifier.weight(1f),color=Color.White,fontWeight=FontWeight.SemiBold);Icon(Icons.Default.ChevronRight,null,tint=VibeMuted)}}
- }
-}
-
-@Composable
-fun VibeFixSongInfoPage(songs:List<Track>,overrides:Map<Long,Pair<String,String>>,onSave:(Track,String,String)->Unit,onUndo:(Track)->Unit){
- var query by remember{mutableStateOf("")}
- var selected by remember{mutableStateOf<Track?>(null)}
- var title by remember{mutableStateOf("")}
- var artist by remember{mutableStateOf("")}
- Column(Modifier.fillMaxSize().padding(horizontal=18.dp)){
-  Text("Fix song info",color=Color.White,fontSize=23.sp,fontWeight=FontWeight.Bold)
-  Text("Correct song title and artist in your VIBE library",color=VibeMuted,fontSize=12.sp,modifier=Modifier.padding(bottom=12.dp))
-  OutlinedTextField(query,{query=it},Modifier.fillMaxWidth(),placeholder={Text("Find a song…")},singleLine=true)
-  if(selected==null)LazyColumn(Modifier.weight(1f)){items(songs.filter{it.title.contains(query,true)||it.artist.contains(query,true)}.take(100)){track->Row(Modifier.fillMaxWidth().clickable{selected=track;title=track.title;artist=track.artist}.padding(vertical=10.dp),verticalAlignment=Alignment.CenterVertically){Icon(Icons.Default.MusicNote,null,tint=VibePink);Column(Modifier.weight(1f).padding(start=10.dp)){Text(track.title,color=Color.White);Text(track.artist,color=VibeMuted,fontSize=11.sp)};if(track.id in overrides)Text("Edited",color=VibePink,fontSize=10.sp)}}}
-  else{Text("Selected: ${selected?.title}",color=VibeMuted,modifier=Modifier.padding(vertical=12.dp));OutlinedTextField(title,{title=it},Modifier.fillMaxWidth(),label={Text("Song title")});Spacer(Modifier.height(8.dp));OutlinedTextField(artist,{artist=it},Modifier.fillMaxWidth(),label={Text("Artist")});Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){Button(onClick={selected?.let{onSave(it,title.trim(),artist.trim())};selected=null},enabled=title.isNotBlank(),colors=ButtonDefaults.buttonColors(containerColor=VibePink)){Text("Save correction")};TextButton(onClick={selected?.let(onUndo);selected=null}){Text("Undo fix",color=VibePink)};TextButton(onClick={selected=null}){Text("Cancel",color=VibeMuted)}}}
- }
-}
