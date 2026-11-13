@@ -38,78 +38,6 @@ private fun vibePalette(theme:String):List<Color> = when(theme){
 }
 
 @Composable
-fun VibeMusicLibrary(
- songs:List<Track>, videos:List<Track>, favourites:Set<Long>,
- playlists:Map<String,Set<Long>>, selected:Track?, lyricIds:Set<Long>,
- onPlay:(Track)->Unit, onFav:(Track)->Unit, onCreatePlaylist:()->Unit,
- onOpenPlayer:()->Unit, onProfile:()->Unit
-){
- var tab by remember { mutableStateOf("Songs") }
- var query by remember { mutableStateOf("") }
- var searching by remember { mutableStateOf(false) }
- var sort by remember { mutableStateOf("Recently added") }
- var menu by remember { mutableStateOf(false) }
- val filtered=remember(songs,query,sort){songs.filter{it.title.contains(query,true)||it.artist.contains(query,true)}.let{if(sort=="Title A–Z")it.sortedBy{t->t.title.lowercase()}else if(sort=="Artist")it.sortedBy{t->t.artist.lowercase()}else it.sortedByDescending{t->t.dateAdded}}}
- Column(Modifier.fillMaxSize()){
-  Row(Modifier.fillMaxWidth().padding(start=18.dp,end=12.dp,top=4.dp,bottom=10.dp),verticalAlignment=Alignment.CenterVertically){
-   Text("VIBE",Modifier.weight(1f),color=VibeText,fontSize=30.sp,fontWeight=FontWeight.Black,letterSpacing=2.sp)
-   IconButton(onClick={searching=!searching;query=""}){Icon(Icons.Default.Search,"Search",tint=VibeText,modifier=Modifier.size(27.dp))}
-   IconButton(onClick=onProfile){Icon(Icons.Default.AccountCircle,"Profile",tint=VibeText,modifier=Modifier.size(27.dp))}
-  }
-  if(searching) OutlinedTextField(query,{query=it},Modifier.fillMaxWidth().padding(horizontal=18.dp),placeholder={Text("Search songs or artists")},singleLine=true,colors=OutlinedTextFieldDefaults.colors(focusedTextColor=VibeText,unfocusedTextColor=VibeText,focusedBorderColor=VibePink,unfocusedBorderColor=VibeMuted))
-  Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal=16.dp),horizontalArrangement=Arrangement.spacedBy(25.dp),verticalAlignment=Alignment.CenterVertically){
-   listOf("For you","Songs","Playlist","Video").forEach{label->Column(Modifier.clickable{tab=label}.padding(vertical=9.dp),horizontalAlignment=Alignment.CenterHorizontally){Text(label,color=if(tab==label)VibeText else VibeMuted,fontSize=18.sp,fontWeight=if(tab==label)FontWeight.Bold else FontWeight.Medium);if(tab==label)Box(Modifier.padding(top=5.dp).width(32.dp).height(3.dp).clip(RoundedCornerShape(5.dp)).background(VibePink))}}
-  }
-  when(tab){
-   "For you"->LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(16.dp),verticalArrangement=Arrangement.spacedBy(12.dp)){
-    item{Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(Brush.linearGradient(listOf(Color(0xFFFF6A00),VibePink,Color(0xFF4C19A8)))).padding(20.dp)){Column{Text("YOUR MUSIC, YOUR MOOD",color=Color.White,fontSize=11.sp,letterSpacing=2.sp);Text("Find your rhythm.",color=Color.White,fontSize=26.sp,fontWeight=FontWeight.Bold);Text("${songs.size} songs • ${videos.size} videos",color=Color.White)}}}
-    item{Text("Recently played",color=VibeText,fontSize=19.sp,fontWeight=FontWeight.Bold)}
-    items((listOfNotNull(selected)+songs.filter{it.id!=selected?.id}.take(8))){t->VibeSongRow(t,t.id in favourites,t.id in lyricIds,{onPlay(t)},{onFav(t)})}
-   }
-   "Songs"->{
-    Row(Modifier.fillMaxWidth().padding(horizontal=20.dp,vertical=7.dp),verticalAlignment=Alignment.CenterVertically){
-     IconButton(onClick={filtered.firstOrNull()?.let(onPlay)}){Icon(Icons.Default.PlayCircle,"Play all",tint=VibeText,modifier=Modifier.size(30.dp))}
-     IconButton(onClick={onCreatePlaylist}){Icon(Icons.Default.Shuffle,"Shuffle",tint=VibeText,modifier=Modifier.size(26.dp))}
-     Spacer(Modifier.weight(1f))
-     Text("${filtered.size} Songs",color=VibeMuted,fontSize=17.sp)
-     Box{IconButton(onClick={menu=true}){Icon(Icons.Default.Sort,"Sort",tint=VibeMuted)};DropdownMenu(expanded=menu,onDismissRequest={menu=false}){listOf("Recently added","Title A–Z","Artist").forEach{DropdownMenuItem(text={Text(it)},onClick={sort=it;menu=false})}}}
-    }
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=8.dp)){
-     items(filtered){t->VibeSongRow(t,t.id in favourites,t.id in lyricIds,{onPlay(t)},{onFav(t)})}
-     if(filtered.isEmpty())item{Text(if(songs.isEmpty())"Your music will appear here after library access is granted." else "No matching songs.",color=VibeMuted,modifier=Modifier.padding(20.dp))}
-    }
-   }
-   "Playlist"->LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(16.dp),verticalArrangement=Arrangement.spacedBy(8.dp)){
-    item{Row(verticalAlignment=Alignment.CenterVertically){Text("Your playlists",Modifier.weight(1f),color=VibeText,fontSize=20.sp,fontWeight=FontWeight.Bold);TextButton(onClick=onCreatePlaylist){Text("+ New",color=VibePink)}}}
-    if(playlists.isEmpty())item{Text("Create a playlist from your music library.",color=VibeMuted)}
-    playlists.forEach{(name,ids)->item{Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(VibePanel).clickable{songs.firstOrNull{it.id in ids}?.let(onPlay)}.padding(14.dp),verticalAlignment=Alignment.CenterVertically){Icon(Icons.Default.QueueMusic,null,tint=VibePink);Spacer(Modifier.width(12.dp));Column(Modifier.weight(1f)){Text(name,color=VibeText,fontWeight=FontWeight.SemiBold);Text("${ids.size} tracks",color=VibeMuted,fontSize=11.sp)};Icon(Icons.Default.PlayArrow,null,tint=VibeText)}}}
-   }
-   "Video"->LazyColumn(Modifier.weight(1f)){items(videos){VibeSongRow(it,false,false,{onPlay(it)},{})}}
-  }
-  if(selected!=null)Row(Modifier.fillMaxWidth().padding(horizontal=12.dp,vertical=5.dp).clip(RoundedCornerShape(28.dp)).background(Color(0xFF252027)).clickable(onClick=onOpenPlayer).padding(horizontal=10.dp,vertical=7.dp),verticalAlignment=Alignment.CenterVertically){
-   Box(Modifier.size(40.dp).clip(RoundedCornerShape(50)).background(Brush.linearGradient(listOf(VibePink,Color(0xFF5A2BC2)))),contentAlignment=Alignment.Center){Icon(Icons.Default.Album,null,tint=Color.White)}
-   Text(selected.title,Modifier.weight(1f).padding(horizontal=10.dp),color=VibeText,maxLines=1,overflow=TextOverflow.Ellipsis)
-   IconButton(onClick=onOpenPlayer){Icon(Icons.Default.PlayCircle,"Open player",tint=VibeText)}
-   IconButton(onClick=onOpenPlayer){Icon(Icons.Default.QueueMusic,"Queue",tint=VibeMuted)}
-  }
- }
-}
-
-@Composable
-private fun VibeSongRow(track:Track,favourite:Boolean,hasLyrics:Boolean,onClick:()->Unit,onFav:()->Unit){
- var menu by remember{mutableStateOf(false)}
- Row(Modifier.fillMaxWidth().clickable(onClick=onClick).padding(horizontal=14.dp,vertical=5.dp),verticalAlignment=Alignment.CenterVertically){
-  Box(Modifier.size(58.dp).clip(RoundedCornerShape(9.dp)).background(Brush.linearGradient(listOf(Color(0xFF4D77FF),Color(0xFF55C7F3)))),contentAlignment=Alignment.Center){Icon(if(track.isVideo)Icons.Default.VideoFile else Icons.Default.MusicNote,null,tint=Color.White,modifier=Modifier.size(34.dp))}
-  Spacer(Modifier.width(13.dp))
-  Column(Modifier.weight(1f),verticalArrangement=Arrangement.Center){
-   Text(track.title,color=VibeText,fontSize=15.sp,fontWeight=FontWeight.Medium,maxLines=1,overflow=TextOverflow.Ellipsis)
-   Row(verticalAlignment=Alignment.CenterVertically){if(hasLyrics){Text("Lyric",Modifier.border(1.dp,VibePink,RoundedCornerShape(4.dp)).padding(horizontal=4.dp, vertical=1.dp),color=VibePink,fontSize=10.sp);Spacer(Modifier.width(5.dp))};Text(track.artist.ifBlank{"unknown"},color=VibeMuted,fontSize=12.sp,maxLines=1,overflow=TextOverflow.Ellipsis)}
-  }
-  Box{IconButton(onClick={menu=true}){Icon(Icons.Default.MoreVert,"More options",tint=VibeMuted)};DropdownMenu(expanded=menu,onDismissRequest={menu=false}){DropdownMenuItem(text={Text(if(favourite)"Remove favourite" else "Add to favourites")},onClick={onFav});DropdownMenuItem(text={Text("Play")},onClick=onClick)}}
- }
-}
-
-@Composable
 fun VibePlayerScreen(
  theme:String,player:androidx.media3.session.MediaController?,track:Track?,position:Long,duration:Long,playing:Boolean,shuffle:Boolean,repeat:Int,audioOnly:Boolean,lyrics:String,loading:Boolean,
  loadLyrics:()->Unit,seek:(Long)->Unit,previous:()->Unit,next:()->Unit,toggle:()->Unit,toggleShuffle:()->Unit,toggleRepeat:()->Unit,toggleAudio:()->Unit,close:()->Unit
@@ -119,7 +47,7 @@ fun VibePlayerScreen(
  val lines=remember(lyrics){LyricsClient.parseLrc(lyrics)}
  val active=lines.indexOfLast{it.timeMs<=position}.coerceAtLeast(0)
  val palette=vibePalette(theme)
- Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(palette[0].copy(alpha=.9f),palette[1],palette[2]))).pointerInput(lyricsPage){detectHorizontalDragGestures(onHorizontalDrag={_,amount->drag+=amount},onDragEnd={if(drag < -45)lyricsPage=true else if(drag>45)lyricsPage=false;drag=0f})}){
+ Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(palette[0].copy(alpha=.9f),palette[1],palette[2]))).pointerInput(lyricsPage,lyrics){detectHorizontalDragGestures(onHorizontalDrag={_,amount->drag+=amount},onDragEnd={if(drag < -45){lyricsPage=true;if(lyrics.isBlank())loadLyrics()} else if(drag>45)lyricsPage=false;drag=0f})}){
   if(!lyricsPage){
    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal=18.dp),horizontalAlignment=Alignment.CenterHorizontally){
     Row(Modifier.fillMaxWidth().padding(top=8.dp),verticalAlignment=Alignment.CenterVertically){IconButton(onClick=close){Icon(Icons.Default.KeyboardArrowDown,"Back",tint=Color.White,modifier=Modifier.size(30.dp))};Column(Modifier.weight(1f)){Text(track?.title?:"Now playing",color=Color.White,fontSize=18.sp,fontWeight=FontWeight.Bold,maxLines=1,overflow=TextOverflow.Ellipsis);Text(track?.artist.orEmpty(),color=Color.White.copy(alpha=.72f),fontSize=14.sp,maxLines=1,overflow=TextOverflow.Ellipsis)};IconButton(onClick={lyricsPage=true;if(lyrics.isBlank())loadLyrics()}){Icon(Icons.Default.Tune,"Player options",tint=Color.White)}}
