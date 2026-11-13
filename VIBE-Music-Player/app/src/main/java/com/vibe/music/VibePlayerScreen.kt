@@ -41,6 +41,7 @@ internal fun VibePlayerScreen(
   4->listOf(Color(0xFF00D9A6),Color(0xFF087A70),Color(0xFF050D13))
   else->listOf(Color(0xFFB9FFD0),Color(0xFF35C878),Color(0xFF07180F))
  }
+ }
  Box(Modifier.fillMaxSize().background(Brush.verticalGradient(colors)).pointerInput(lyricsPage){
   detectHorizontalDragGestures(onDragStart={drag=0f},onHorizontalDrag={change,amount->drag+=amount;change.consume()},onDragEnd={if(drag < -55f)lyricsPage=true else if(drag>55f)lyricsPage=false})
  }){
