@@ -1,6 +1,13 @@
 package com.vibe.music
 
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import androidx.compose.foundation.*
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -34,8 +41,8 @@ internal fun VibeMusicLibrary(
     }
     val list = baseList.filter { query.isBlank() || it.title.contains(query,true) || it.artist.contains(query,true) }
     Column(Modifier.fillMaxSize()) {
-        Box(Modifier.fillMaxWidth().padding(horizontal=14.dp).clip(RoundedCornerShape(22.dp))
-            .background(Brush.linearGradient(listOf(Color(0xFFFF7A00),Color(0xFFEC008C),Color(0xFF4014B8),Color(0xFF070A1D))))
+        Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(bottomStart=22.dp,bottomEnd=22.dp))
+            .background(Brush.linearGradient(listOf(Color(0xFFFF7900),Color(0xFFFF087F),Color(0xFF7A16C8),Color(0xFF080817))))
             .padding(horizontal=17.dp, vertical=14.dp)) {
             Column {
                 Row(verticalAlignment=Alignment.CenterVertically) {
@@ -90,7 +97,7 @@ internal fun VibeMusicLibrary(
                 else LazyColumn(Modifier.weight(1f), contentPadding=PaddingValues(bottom=8.dp)) {
                     items(list, key={it.id}) { track ->
                         Row(Modifier.fillMaxWidth().clickable { onPlay(track) }.padding(horizontal=14.dp, vertical=5.dp), verticalAlignment=Alignment.CenterVertically) {
-                            CoverTile(track.id, Modifier.size(58.dp))
+                            TrackCover(track, Modifier.size(58.dp))
                             Spacer(Modifier.width(13.dp))
                             Column(Modifier.weight(1f)) {
                                 Text(track.title, color=Color.White, fontSize=15.sp, maxLines=1, overflow=TextOverflow.Ellipsis, fontWeight=FontWeight.Medium)
@@ -110,7 +117,7 @@ internal fun VibeMusicLibrary(
         }
         playingTrack?.let { track ->
             Row(Modifier.fillMaxWidth().padding(horizontal=12.dp, vertical=5.dp).clip(RoundedCornerShape(28.dp)).background(Color(0xFF292929)).clickable(onClick=onOpenPlayer).padding(horizontal=10.dp, vertical=7.dp), verticalAlignment=Alignment.CenterVertically) {
-                CoverTile(track.id, Modifier.size(38.dp))
+                TrackCover(track, Modifier.size(38.dp))
                 Spacer(Modifier.width(10.dp))
                 Text(track.title, color=Color.White, maxLines=1, overflow=TextOverflow.Ellipsis, modifier=Modifier.weight(1f), fontSize=14.sp)
                 IconButton(onClick=onOpenPlayer) { Icon(Icons.Default.PlayCircleOutline, null, tint=Color.White) }
@@ -124,5 +131,34 @@ internal fun VibeMusicLibrary(
     val colors=palettes[kotlin.math.abs(seed%palettes.size).toInt()]
     Box(modifier.clip(RoundedCornerShape(7.dp)).background(Brush.linearGradient(colors)), contentAlignment=Alignment.Center) {
         Icon(Icons.Default.Album, null, tint=Color.White.copy(alpha=.9f), modifier=Modifier.fillMaxSize(.63f))
+    }
+}
+
+
+@Composable
+private fun TrackCover(track:Track,modifier:Modifier=Modifier) {
+    val context=LocalContext.current
+    val artwork by produceState<Bitmap?>(null,track.uri) {
+        value=withContext(Dispatchers.IO) {
+            runCatching {
+                val retriever=MediaMetadataRetriever()
+                try {
+                    retriever.setDataSource(context,track.uri)
+                    retriever.embeddedPicture?.let { bytes -> android.graphics.BitmapFactory.decodeByteArray(bytes,0,bytes.size) }
+                } finally { retriever.release() }
+            }.getOrNull()
+        }
+    }
+    val palettes=listOf(
+        listOf(Color(0xFFFF2D83),Color(0xFF541388)),
+        listOf(Color(0xFFFF9F1C),Color(0xFF7B2CBF)),
+        listOf(Color(0xFF00B4D8),Color(0xFF03045E)),
+        listOf(Color(0xFF2EC4B6),Color(0xFF011627)),
+        listOf(Color(0xFFFB5607),Color(0xFF3A0CA3))
+    )
+    val colors=palettes[kotlin.math.abs(track.id%palettes.size).toInt()]
+    Box(modifier.clip(RoundedCornerShape(8.dp)).background(Brush.linearGradient(colors)),contentAlignment=Alignment.Center) {
+        if(artwork!=null) Image(artwork!!.asImageBitmap(),contentDescription="Album cover for ${track.title}",modifier=Modifier.fillMaxSize(),contentScale=ContentScale.Crop)
+        else Icon(if(track.isVideo)Icons.Default.PlayCircle else Icons.Default.MusicNote,null,tint=Color.White.copy(alpha=.95f),modifier=Modifier.fillMaxSize(.62f))
     }
 }
