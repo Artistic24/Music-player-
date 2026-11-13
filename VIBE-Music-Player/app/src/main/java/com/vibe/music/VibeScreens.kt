@@ -12,6 +12,7 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -19,7 +20,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.graphicsLayer
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
@@ -41,7 +42,7 @@ private fun vibePalette(theme:String):List<Color> = when(theme){
  "Blue Ocean"->listOf(Color(0xFF7CEBFF),Color(0xFF2376D8),Color(0xFF061726))
  "Rainforest"->listOf(Color(0xFF25D366),Color(0xFF075B45),Color(0xFF061712))
  "Green Vibe"->listOf(Color(0xFFB5FFD7),Color(0xFF18B978),Color(0xFF071B13))
- "Muso Style"->listOf(Color(0xFFFF8A00),Color(0xFFFF0080),Color(0xFF241078))
+ "Muso Style"->listOf(Color(0xFFFF8A00),Color(0xFFFF168A),Color(0xFF69004F))
  else->listOf(Color(0xFFFF168A),Color(0xFF7900A8),Color(0xFF160014))
 }
 
@@ -55,6 +56,9 @@ fun VibePlayerScreen(
  val lines=remember(lyrics){LyricsClient.parseLrc(lyrics)}
  val active=lines.indexOfLast{it.timeMs<=position}.coerceAtLeast(0)
  val palette=vibePalette(theme)
+ val motion=rememberInfiniteTransition(label="vibe-player-motion")
+ val vinylSpin by motion.animateFloat(0f,360f,infiniteRepeatable(tween(7000,easing=LinearEasing),RepeatMode.Restart),label="vibe-vinyl-spin")
+ val beatPulse by motion.animateFloat(.985f,1.02f,infiniteRepeatable(tween(520,easing=FastOutSlowInEasing),RepeatMode.Reverse),label="vibe-beat-pulse")
  val context=LocalContext.current
  val artwork by produceState<Bitmap?>(null,track?.uri){
   value=withContext(Dispatchers.IO){
@@ -74,9 +78,9 @@ fun VibePlayerScreen(
     Row(Modifier.fillMaxWidth().padding(top=8.dp),verticalAlignment=Alignment.CenterVertically){IconButton(onClick=close){Icon(Icons.Default.KeyboardArrowDown,"Back",tint=Color.White,modifier=Modifier.size(30.dp))};Column(Modifier.weight(1f)){Text(track?.title?:"Now playing",color=Color.White,fontSize=18.sp,fontWeight=FontWeight.Bold,maxLines=1,overflow=TextOverflow.Ellipsis);Text(track?.artist.orEmpty(),color=Color.White.copy(alpha=.72f),fontSize=14.sp,maxLines=1,overflow=TextOverflow.Ellipsis)};IconButton(onClick={lyricsPage=true;if(lyrics.isBlank())loadLyrics()}){Icon(Icons.Default.Tune,"Player options",tint=Color.White)}}
     Spacer(Modifier.height(20.dp))
     Box(Modifier.fillMaxWidth().height(330.dp),contentAlignment=Alignment.Center){
-     Box(Modifier.size(300.dp).clip(RoundedCornerShape(50)).background(Brush.radialGradient(listOf(Color(0xFFFFC5B7),palette[0],Color(0xFF21051D)))),contentAlignment=Alignment.Center){
-      Box(Modifier.size(246.dp).clip(RoundedCornerShape(50)).background(Brush.radialGradient(listOf(Color(0xFF17121F),Color(0xFF3D164B),Color(0xFF100916)))),contentAlignment=Alignment.Center){
-       Box(Modifier.size(168.dp).clip(if(playerStyle=="Round"||playerStyle=="Rose Vinyl")RoundedCornerShape(50) else RoundedCornerShape(24.dp)).background(Brush.linearGradient(listOf(Color(0xFFFFE1D1),Color(0xFFFF4E9C),Color(0xFF6520A2)))),contentAlignment=Alignment.Center){if(artwork!=null)Image(artwork!!.asImageBitmap(),contentDescription="Album artwork",modifier=Modifier.fillMaxSize(),contentScale=ContentScale.Crop)else Icon(Icons.Default.Album,null,tint=Color.White,modifier=Modifier.size(90.dp))}
+     Box(Modifier.size(300.dp).graphicsLayer{rotationZ=if(playing && playerStyle=="Spin Vinyl")vinylSpin else 0f;val pulse=if(playing && playerStyle=="Dynamic")beatPulse else 1f;scaleX=pulse;scaleY=pulse}.clip(CircleShape).background(Brush.radialGradient(listOf(Color(0xFFFFC5B7),palette[0],Color(0xFF21051D)))),contentAlignment=Alignment.Center){
+      Box(Modifier.size(246.dp).clip(CircleShape).background(Brush.radialGradient(listOf(Color(0xFF17121F),Color(0xFF3D164B),Color(0xFF100916)))),contentAlignment=Alignment.Center){
+       Box(Modifier.size(168.dp).clip(if(playerStyle=="Round")CircleShape else RoundedCornerShape(26.dp)).background(Brush.linearGradient(listOf(Color(0xFFFFE1D1),Color(0xFFFF4E9C),Color(0xFF6520A2)))),contentAlignment=Alignment.Center){if(artwork!=null)Image(artwork!!.asImageBitmap(),contentDescription="Album artwork",modifier=Modifier.fillMaxSize(),contentScale=ContentScale.Crop)else Icon(Icons.Default.Album,null,tint=Color.White,modifier=Modifier.size(90.dp))}
       }
      }
     }
@@ -118,27 +122,47 @@ internal fun DancingPet(playing:Boolean) {
     val dance = rememberInfiniteTransition(label="vibe-pet-dance")
     val bounce by dance.animateFloat(
         initialValue=0f, targetValue=1f,
-        animationSpec=infiniteRepeatable(tween(if(playing)190 else 900, easing=FastOutSlowInEasing), RepeatMode.Reverse),
+        animationSpec=infiniteRepeatable(tween(if(playing)170 else 950, easing=FastOutSlowInEasing), RepeatMode.Reverse),
         label="pet-bounce"
     )
     val sway by dance.animateFloat(
-        initialValue=-7f, targetValue=7f,
-        animationSpec=infiniteRepeatable(tween(if(playing)260 else 1200, easing=FastOutSlowInEasing), RepeatMode.Reverse),
+        initialValue=-1f, targetValue=1f,
+        animationSpec=infiniteRepeatable(tween(if(playing)210 else 1300, easing=FastOutSlowInEasing), RepeatMode.Reverse),
         label="pet-sway"
     )
+    val step by dance.animateFloat(
+        initialValue=-1f, targetValue=1f,
+        animationSpec=infiniteRepeatable(tween(if(playing)145 else 1500, easing=FastOutSlowInEasing), RepeatMode.Reverse),
+        label="pet-step"
+    )
+    val musicNote by dance.animateFloat(
+        initialValue=0f, targetValue=1f,
+        animationSpec=infiniteRepeatable(tween(if(playing)620 else 1600, easing=FastOutSlowInEasing), RepeatMode.Reverse),
+        label="pet-music-note"
+    )
     Box(
-        Modifier.size(88.dp).graphicsLayer {
-            translationY = if(playing) -bounce*10f else -2f
-            rotationZ = if(playing) sway else 0f
-            scaleX = 1f + if(playing) bounce*.035f else 0f
-            scaleY = 1f + if(playing) bounce*.035f else 0f
+        Modifier.size(108.dp).graphicsLayer {
+            translationY = if(playing) -bounce*14f else -2f
+            translationX = if(playing) step*5f else 0f
+            rotationZ = if(playing) sway*15f else 0f
+            scaleX = 1f + if(playing) bounce*.045f else 0f
+            scaleY = 1f - if(playing) bounce*.025f else 0f
         },
         contentAlignment=Alignment.Center
     ) {
-        Box(Modifier.size(78.dp).clip(RoundedCornerShape(26.dp)).background(Brush.radialGradient(listOf(Color(0x66FF168A),Color(0x00100612)))),contentAlignment=Alignment.Center) {
-            Text("🐶",fontSize=57.sp)
-            Icon(Icons.Default.Headphones,null,tint=Color(0xFFFF55B5),modifier=Modifier.align(Alignment.TopCenter).padding(top=1.dp).size(23.dp))
+        Box(
+            Modifier.size(96.dp).clip(RoundedCornerShape(30.dp))
+                .background(Brush.radialGradient(listOf(Color(0x66FF168A),Color(0x00100612)))),
+            contentAlignment=Alignment.Center
+        ) {
+            Text("🐕",fontSize=65.sp)
+            Icon(Icons.Default.Headphones,null,tint=Color(0xFFFF55B5),modifier=Modifier.align(Alignment.TopCenter).padding(top=3.dp).size(27.dp))
         }
-        if(playing) Text("♪",color=Color(0xFFFF78C4),fontSize=20.sp,fontWeight=FontWeight.Black,modifier=Modifier.align(Alignment.TopEnd))
+        if(playing) {
+            Text("♫",color=Color(0xFFFF78C4),fontSize=21.sp,fontWeight=FontWeight.Black,
+                modifier=Modifier.align(Alignment.TopEnd).offset(y=(-musicNote*9f).dp))
+            Text("♪",color=Color(0xFF25D9F3),fontSize=16.sp,fontWeight=FontWeight.Black,
+                modifier=Modifier.align(Alignment.CenterStart).offset(x=(-2).dp,y=(-musicNote*8f).dp))
+        }
     }
 }
