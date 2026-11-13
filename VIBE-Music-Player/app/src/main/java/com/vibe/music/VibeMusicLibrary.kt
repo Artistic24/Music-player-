@@ -25,13 +25,14 @@ internal fun VibeMusicLibrary(
     onCreatePlaylist: () -> Unit, onOpenPlayer: () -> Unit
 ) {
     var tab by remember { mutableIntStateOf(1) }
-    var sortNewest by remember { mutableStateOf(false) }
-    val list = when(tab) {
+    var sortNewest by remember { mutableStateOf(false) }; var searchOpen by remember { mutableStateOf(false) }; var query by remember { mutableStateOf("") }
+    val baseList = when(tab) {
         0 -> songs.sortedByDescending { it.dateAdded }.take(12)
         1 -> if(sortNewest) songs.sortedByDescending { it.dateAdded } else songs
         2 -> emptyList()
         else -> videos
     }
+    val list = baseList.filter { query.isBlank() || it.title.contains(query,true) || it.artist.contains(query,true) }
     Column(Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxWidth().padding(horizontal=14.dp).clip(RoundedCornerShape(22.dp))
             .background(Brush.linearGradient(listOf(Color(0xFFFF7A00),Color(0xFFEC008C),Color(0xFF4014B8),Color(0xFF070A1D))))
@@ -40,9 +41,9 @@ internal fun VibeMusicLibrary(
                 Row(verticalAlignment=Alignment.CenterVertically) {
                     Text("VIBE", color=Color.White, fontSize=28.sp, fontWeight=FontWeight.Black, letterSpacing=1.5.sp)
                     Spacer(Modifier.weight(1f))
-                    Icon(Icons.Default.Search, null, tint=Color.White, modifier=Modifier.size(25.dp))
+                    IconButton(onClick={searchOpen=!searchOpen}) { Icon(Icons.Default.Search, "Search", tint=Color.White, modifier=Modifier.size(25.dp)) }
                     Spacer(Modifier.width(14.dp))
-                    Icon(Icons.Default.AccountCircle, null, tint=Color.White, modifier=Modifier.size(26.dp))
+                    IconButton(onClick=onOpenPlayer) { Icon(Icons.Default.AccountCircle, "Profile", tint=Color.White, modifier=Modifier.size(26.dp)) }
                 }
                 Spacer(Modifier.height(14.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.SpaceBetween) {
@@ -56,6 +57,7 @@ internal fun VibeMusicLibrary(
                 }
             }
         }
+        if(searchOpen) OutlinedTextField(value=query,onValueChange={query=it},modifier=Modifier.fillMaxWidth().padding(horizontal=14.dp),singleLine=true,placeholder={Text("Search songs or artists")},trailingIcon={IconButton(onClick={query="";searchOpen=false}){Icon(Icons.Default.Close,null)}},colors=OutlinedTextFieldDefaults.colors(focusedTextColor=Color.White,unfocusedTextColor=Color.White,focusedBorderColor=Color(0xFFFF2D83),unfocusedBorderColor=Color.Gray))
         Row(Modifier.fillMaxWidth().padding(horizontal=18.dp, vertical=12.dp), verticalAlignment=Alignment.CenterVertically) {
             IconButton(onClick={ if(tab==2) onCreatePlaylist() else (if(tab==3) videos.firstOrNull() else songs.firstOrNull())?.let(onPlay) }) {
                 Icon(if(tab==2) Icons.Default.AddCircle else Icons.Default.PlayCircleFilled, null, tint=Color.White, modifier=Modifier.size(29.dp))
