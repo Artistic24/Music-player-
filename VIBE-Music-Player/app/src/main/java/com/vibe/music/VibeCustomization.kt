@@ -108,3 +108,15 @@ internal fun VibeHideScanPage(tracks:List<Track>,hidden:Set<Long>,onToggle:(Trac
         }
     }
 }
+
+
+@Composable
+internal fun VibeSettingsPage(theme:String,style:String,petEnabled:Boolean,onPetToggle:(Boolean)->Unit,onBack:()->Unit){
+ LazyColumn(Modifier.fillMaxSize().padding(16.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){
+  item{Row(verticalAlignment=Alignment.CenterVertically){IconButton(onClick=onBack){Icon(Icons.Default.ArrowBack,"Back",tint=Color.White)};Text("Settings",color=Color.White,fontSize=23.sp,fontWeight=FontWeight.Bold)}}
+  item{Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color(0xFF211B36)).padding(15.dp)){Text("Appearance",color=Color.White,fontWeight=FontWeight.Bold);Spacer(Modifier.height(7.dp));Text("Theme: $theme",color=Color(0xFFFF8BC2));Text("Player style: $style",color=Color(0xFFB8B0CE),fontSize=12.sp);Text("Change these options in Me → Theme Gallery and Player Style.",color=Color(0xFFB8B0CE),fontSize=11.sp)}}
+  item{Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color(0xFF211B36)).padding(15.dp),verticalAlignment=Alignment.CenterVertically){Icon(Icons.Default.Pets,null,tint=Color(0xFFFF2D83),modifier=Modifier.size(27.dp));Spacer(Modifier.width(12.dp));Column(Modifier.weight(1f)){Text("Music Pet",color=Color.White,fontWeight=FontWeight.SemiBold);Text("Animate the headphone puppy while music plays.",color=Color(0xFFB8B0CE),fontSize=11.sp)};Switch(checked=petEnabled,onCheckedChange=onPetToggle)}}
+  item{Text("Playback controls",color=Color.White,fontWeight=FontWeight.Bold);Text("Play, pause, seek, shuffle, repeat and sleep timer are available on the Now Playing screen.",color=Color(0xFFB8B0CE),fontSize=12.sp)}
+  item{Text("Library",color=Color.White,fontWeight=FontWeight.Bold);Text("Use Hide & Scan to exclude tracks from VIBE without deleting files. Rescan reloads media from Android MediaStore.",color=Color(0xFFB8B0CE),fontSize=12.sp)}
+ }
+}
