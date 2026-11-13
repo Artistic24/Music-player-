@@ -94,7 +94,7 @@ private enum class Page(val label:String){HOME("For You"),MUSIC("Music"),VIDEOS(
  Text("Equalizer & bass enhancement depend on device audio effects and are not enabled in this build.",color=Color(0xFFB8B0CE),fontSize=11.sp)
  }
 }
-private fun timeLabel(ms:Long):String{val s=ms.coerceAtLeast(0)/1000;return "%d:%02d".format(s/60,s%60)}
+internal fun timeLabel(ms:Long):String{val s=ms.coerceAtLeast(0)/1000;return "%d:%02d".format(s/60,s%60)}
 
 @Composable
 private fun ConverterPage(videos: List<Track>, context: android.content.Context, report: (String) -> Unit) {
