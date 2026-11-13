@@ -19,14 +19,21 @@ import androidx.compose.ui.unit.*
 
 @Composable
 internal fun VibePlayerScreen(
- player:androidx.media3.session.MediaController?,track:Track?,position:Long,duration:Long,playing:Boolean,
+ themeName:String,player:androidx.media3.session.MediaController?,track:Track?,position:Long,duration:Long,playing:Boolean,
  shuffle:Boolean,repeat:Int,audioOnly:Boolean,lyrics:String,loadingLyrics:Boolean,loadLyrics:()->Unit,
  seek:(Long)->Unit,previous:()->Unit,next:()->Unit,toggle:()->Unit,toggleShuffle:()->Unit,
  toggleRepeat:()->Unit,toggleAudio:()->Unit,close:()->Unit
 ){
  var lyricsPage by remember{mutableStateOf(false)}
  var drag by remember{mutableFloatStateOf(0f)}
- val colors=when(track?.title?.hashCode()?.let{kotlin.math.abs(it%6)}){
+ val colors=when(themeName){
+  "Muso Style"->listOf(Color(0xFFFF7900),Color(0xFFEC008C),Color(0xFF10051B))
+  "Fiery Rhythms"->listOf(Color(0xFFFF3D00),Color(0xFF7A001F),Color(0xFF100308))
+  "Radiant Nights"->listOf(Color(0xFFFF27B8),Color(0xFF5420C8),Color(0xFF06112D))
+  "Blue Ocean"->listOf(Color(0xFF8DEBFF),Color(0xFF168DD1),Color(0xFF061321))
+  "Rainforest"->listOf(Color(0xFF00D9A6),Color(0xFF087A70),Color(0xFF050D13))
+  "Green Vibe"->listOf(Color(0xFFB9FFD0),Color(0xFF35C878),Color(0xFF07180F))
+  else->when(track?.title?.hashCode()?.let{kotlin.math.abs(it%6)}){
   0->listOf(Color(0xFFFF7900),Color(0xFFEC008C),Color(0xFF10051B))
   1->listOf(Color(0xFFFF3D00),Color(0xFF7A001F),Color(0xFF100308))
   2->listOf(Color(0xFFFF27B8),Color(0xFF5420C8),Color(0xFF06112D))
@@ -75,7 +82,7 @@ internal fun VibePlayerScreen(
     Text(track?.artist.orEmpty(),color=Color.White.copy(alpha=.75f),fontSize=14.sp)
     Spacer(Modifier.height(12.dp))
     Slider(value=if(duration>0)(position.toFloat()/duration).coerceIn(0f,1f)else 0f,onValueChange={seek((it*duration).toLong())},colors=SliderDefaults.colors(thumbColor=Color.White,activeTrackColor=Color(0xFFFF2384),inactiveTrackColor=Color.White.copy(alpha=.25f)))
-    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){Text(timeLabel(position),color=Color.White,fontSize=11.sp);Text(timeLabel(duration),color=Color.White,fontSize=11.sp)}
+    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){Text(vibeTimeLabel(position),color=Color.White,fontSize=11.sp);Text(vibeTimeLabel(duration),color=Color.White,fontSize=11.sp)}
     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceEvenly,verticalAlignment=Alignment.CenterVertically){
      IconButton(onClick=toggleShuffle){Icon(Icons.Default.Shuffle,null,tint=if(shuffle)Color(0xFFFF8BC2)else Color.White)}
      IconButton(onClick=previous){Icon(Icons.Default.SkipPrevious,null,tint=Color.White,modifier=Modifier.size(37.dp))}
@@ -89,4 +96,4 @@ internal fun VibePlayerScreen(
   }
  }
 }
-private fun timeLabel(ms:Long):String{val s=ms.coerceAtLeast(0)/1000;return "%d:%02d".format(s/60,s%60)}
+private fun vibeTimeLabel(ms:Long):String{val s=ms.coerceAtLeast(0)/1000;return "%d:%02d".format(s/60,s%60)}
