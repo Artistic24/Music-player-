@@ -77,7 +77,7 @@ internal fun VibeMusicLibrary(
                 } else LazyColumn(Modifier.weight(1f)) {
                     playlists.forEach { (name, ids) ->
                         item { Row(Modifier.fillMaxWidth().clickable { songs.firstOrNull { it.id in ids }?.let(onPlay) }.padding(horizontal=18.dp, vertical=13.dp), verticalAlignment=Alignment.CenterVertically) {
-                            CoverTile(name.hashCode(), Modifier.size(54.dp)); Spacer(Modifier.width(13.dp))
+                            CoverTile(name.hashCode().toLong(), Modifier.size(54.dp)); Spacer(Modifier.width(13.dp))
                             Column(Modifier.weight(1f)) { Text(name, color=Color.White, fontWeight=FontWeight.SemiBold); Text("${ids.size} songs", color=Color.Gray, fontSize=11.sp) }
                             Icon(Icons.Default.PlayArrow, null, tint=Color(0xFFFF2D83))
                         } }
