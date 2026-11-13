@@ -6,6 +6,8 @@ on:
     paths:
       - 'VIBE-Music-Player/**'
       - '.github/workflows/**'
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -33,3 +35,13 @@ jobs:
           name: VIBE-Music-Player-debug-apk
           path: VIBE-Music-Player/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+      - name: Attach release APK to VIBE GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: 1.0.1
+          name: VIBE
+          files: VIBE-Music-Player/app/build/outputs/apk/release/*.apk
+          overwrite_files: true
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
