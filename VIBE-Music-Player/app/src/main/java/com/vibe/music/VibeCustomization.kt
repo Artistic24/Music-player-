@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.*
 
 private data class VibeTheme(val name:String,val colors:List<Color>,val subtitle:String)
 private val vibeThemes=listOf(
- VibeTheme("Muso Style",listOf(Color(0xFFFF7900),Color(0xFFEC008C),Color(0xFF3210A8),Color(0xFF080812)),"Hot • Orange / pink / violet"),
+ VibeTheme("Muso Style",listOf(Color(0xFFFF8A00),Color(0xFFFF168A),Color(0xFF7A0058),Color(0xFF08030A)),"Neon • Orange / magenta / black"),
  VibeTheme("Fiery Rhythms",listOf(Color(0xFFFF3D00),Color(0xFF7A001F),Color(0xFF160609),Color(0xFF050306)),"Flame • Red / ember / black"),
  VibeTheme("Radiant Nights",listOf(Color(0xFFFF27B8),Color(0xFF5420C8),Color(0xFF06112D),Color(0xFF05040C)),"Neon • Magenta / electric blue"),
  VibeTheme("Blue Ocean",listOf(Color(0xFF8DEBFF),Color(0xFF168DD1),Color(0xFF06345D),Color(0xFF061321)),"Cool • Ice blue / deep sea"),
@@ -34,7 +34,20 @@ private val vibeStyles=listOf("Top","Static","Dynamic","Spin Vinyl","Round")
  LazyColumn(Modifier.fillMaxSize(),contentPadding=PaddingValues(horizontal=14.dp,vertical=12.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){
   item{Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(Brush.linearGradient(listOf(Color(0xFFFF7900),Color(0xFFEC008C),Color(0xFF3210A8)))).padding(18.dp),verticalAlignment=Alignment.CenterVertically){Box(Modifier.size(58.dp).clip(RoundedCornerShape(18.dp)).background(Color(0xFF160A24)),contentAlignment=Alignment.Center){Icon(Icons.Default.Album,null,tint=Color.White,modifier=Modifier.size(40.dp))};Spacer(Modifier.width(13.dp));Column{Text("VIBE",color=Color.White,fontSize=25.sp,fontWeight=FontWeight.Black);Text("Your music. Your world.",color=Color.White.copy(alpha=.85f),fontSize=12.sp)}}}
   item{Text("PLAYER STYLE",color=Color.White,fontWeight=FontWeight.Bold,letterSpacing=1.4.sp)}
-  item{Row(Modifier.horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy(8.dp)){vibeStyles.forEach{item->FilterChip(selected=style==item,onClick={onStyle(item)},label={Text(item)},colors=FilterChipDefaults.filterChipColors(selectedContainerColor=Color(0xFFFF2384),selectedLabelColor=Color.White))}}}
+  item{
+   LazyVerticalGrid(columns=GridCells.Fixed(3),modifier=Modifier.fillMaxWidth().height(226.dp),userScrollEnabled=false,verticalArrangement=Arrangement.spacedBy(10.dp),horizontalArrangement=Arrangement.spacedBy(9.dp)){
+    items(vibeStyles){styleName->
+     Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(15.dp)).border(if(style==styleName)2.dp else 1.dp,if(style==styleName)Color(0xFFFF168A) else Color(0xFF45313F),RoundedCornerShape(15.dp)).background(Color(0xFF180D17)).clickable{onStyle(styleName)}.padding(8.dp)){
+      Box(Modifier.fillMaxWidth().height(88.dp).clip(RoundedCornerShape(12.dp)).background(Brush.linearGradient(listOf(Color(0xFFFF8A00),Color(0xFFFF168A),Color(0xFF3C0A38)))),contentAlignment=Alignment.Center){
+       Box(Modifier.size(if(styleName=="Round")62.dp else 68.dp).clip(if(styleName=="Round")RoundedCornerShape(50) else RoundedCornerShape(17.dp)).background(Brush.radialGradient(listOf(Color(0xFFFFD4E8),Color(0xFFFF168A),Color(0xFF340A32)))),contentAlignment=Alignment.Center){Icon(Icons.Default.Album,null,tint=Color.White,modifier=Modifier.size(38.dp))}
+       if(style==styleName)Icon(Icons.Default.CheckCircle,null,tint=Color.White,modifier=Modifier.align(Alignment.TopEnd).padding(5.dp).size(16.dp))
+      }
+      Text(styleName,color=Color.White,fontSize=10.sp,fontWeight=FontWeight.SemiBold,maxLines=1,overflow=TextOverflow.Ellipsis,modifier=Modifier.padding(top=6.dp))
+      Text(if(style==styleName)"Selected" else "Preview style",color=Color(0xFFFF8BC2),fontSize=8.sp)
+     }
+    }
+   }
+  }
   item{Text("THEME GALLERY",color=Color.White,fontWeight=FontWeight.Bold,letterSpacing=1.4.sp)}
   item{
    LazyVerticalGrid(columns=GridCells.Fixed(3),modifier=Modifier.fillMaxWidth().height(430.dp),userScrollEnabled=false,verticalArrangement=Arrangement.spacedBy(12.dp),horizontalArrangement=Arrangement.spacedBy(10.dp)){

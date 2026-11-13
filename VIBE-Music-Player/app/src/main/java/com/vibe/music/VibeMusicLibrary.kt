@@ -42,7 +42,7 @@ internal fun VibeMusicLibrary(
     val list = baseList.filter { query.isBlank() || it.title.contains(query,true) || it.artist.contains(query,true) }
     Column(Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(bottomStart=22.dp,bottomEnd=22.dp))
-            .background(Brush.linearGradient(listOf(Color(0xFFFF7900),Color(0xFFFF087F),Color(0xFF7A16C8),Color(0xFF080817))))
+            .background(Brush.linearGradient(listOf(Color(0xFFFF8A00),Color(0xFFFF168A),Color(0xFF8E006F),Color(0xFF10040F))))
             .padding(horizontal=17.dp, vertical=14.dp)) {
             Column {
                 Row(verticalAlignment=Alignment.CenterVertically) {
