@@ -20,7 +20,7 @@ private val libraryTabs = listOf("For you", "Songs", "Playlist", "Video")
 @Composable
 internal fun VibeMusicLibrary(
     songs: List<Track>, videos: List<Track>, favourites: Set<Long>,
-    playlists: Map<String, Set<Long>>, playingTrack: Track?,
+    playlists: Map<String, Set<Long>>, playingTrack: Track?, lyricsAvailable:Set<Long>,
     onPlay: (Track) -> Unit, onFavourite: (Track) -> Unit,
     onCreatePlaylist: () -> Unit, onOpenPlayer: () -> Unit, onProfile: () -> Unit
 ) {
@@ -95,7 +95,7 @@ internal fun VibeMusicLibrary(
                             Column(Modifier.weight(1f)) {
                                 Text(track.title, color=Color.White, fontSize=15.sp, maxLines=1, overflow=TextOverflow.Ellipsis, fontWeight=FontWeight.Medium)
                                 Row(verticalAlignment=Alignment.CenterVertically) {
-                                    if(!track.isVideo) {
+                                    if(track.id in lyricsAvailable) {
                                         Box(Modifier.clip(RoundedCornerShape(4.dp)).border(1.dp,Color(0xFFFF2D83),RoundedCornerShape(4.dp)).padding(horizontal=4.dp, vertical=1.dp)) { Text("Lyric", color=Color(0xFFFF2D83), fontSize=9.sp) }
                                         Spacer(Modifier.width(5.dp))
                                     }
