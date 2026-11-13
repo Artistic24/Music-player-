@@ -67,3 +67,31 @@ private val vibeStyles=listOf("Top","Static","Dynamic","Spin Vinyl","Round")
  Column(Modifier.fillMaxSize()){Text("Fix song info",color=Color.White,fontSize=22.sp,fontWeight=FontWeight.Bold,modifier=Modifier.padding(18.dp));Text("Correct the title and artist shown in VIBE. Original audio files remain unchanged.",color=Color(0xFFB8B0CE),fontSize=11.sp,modifier=Modifier.padding(horizontal=18.dp));LazyColumn(contentPadding=PaddingValues(12.dp)){items(tracks){track->val changed=overrides[track.id];Row(Modifier.fillMaxWidth().padding(vertical=4.dp).clip(RoundedCornerShape(14.dp)).background(Color(0xFF211B36)).padding(11.dp),verticalAlignment=Alignment.CenterVertically){Icon(Icons.Default.MusicNote,null,tint=Color(0xFFFF5EA8));Spacer(Modifier.width(9.dp));Column(Modifier.weight(1f)){Text(changed?.first?:track.title,color=Color.White,maxLines=1,overflow=TextOverflow.Ellipsis);Text(changed?.second?:track.artist,color=Color(0xFFB8B0CE),fontSize=11.sp,maxLines=1,overflow=TextOverflow.Ellipsis)};TextButton(onClick={title=changed?.first?:track.title;artist=changed?.second?:track.artist;editing=track}){Text("Edit",color=Color(0xFFFF5EA8))};if(changed!=null)IconButton(onClick={onUndo(track)}){Icon(Icons.Default.Undo,"Undo",tint=Color(0xFFFF5EA8))}}}}}
  editing?.let{track->AlertDialog(onDismissRequest={editing=null},title={Text("Edit song information")},text={Column(verticalArrangement=Arrangement.spacedBy(9.dp)){OutlinedTextField(value=title,onValueChange={title=it},label={Text("Song title")},singleLine=true);OutlinedTextField(value=artist,onValueChange={artist=it},label={Text("Artist")},singleLine=true)}},confirmButton={TextButton(onClick={if(title.isNotBlank()&&artist.isNotBlank())onSave(track,title.trim(),artist.trim());editing=null}){Text("Save")}},dismissButton={TextButton(onClick={editing=null}){Text("Cancel")}},containerColor=Color(0xFF211B36),titleContentColor=Color.White,textContentColor=Color.White)}
 }
+
+
+@Composable
+internal fun VibeHideScanPage(tracks:List<Track>,hidden:Set<Long>,onToggle:(Track)->Unit,onRescan:()->Unit) {
+    Column(Modifier.fillMaxSize().padding(horizontal=16.dp)) {
+        Row(Modifier.fillMaxWidth().padding(vertical=12.dp),verticalAlignment=Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text("Hide & Scan",color=Color.White,fontSize=23.sp,fontWeight=FontWeight.Bold)
+                Text("Hidden songs stay on your device; VIBE simply leaves them out of your library.",color=Color(0xFFB8B0CE),fontSize=11.sp)
+            }
+            Button(onClick=onRescan,colors=ButtonDefaults.buttonColors(containerColor=Color(0xFFFF2384))) { Text("Rescan") }
+        }
+        Text("${hidden.size} hidden • ${tracks.size-hidden.size} visible",color=Color(0xFFFF72B5),fontSize=12.sp,modifier=Modifier.padding(vertical=8.dp))
+        LazyColumn(verticalArrangement=Arrangement.spacedBy(5.dp)) {
+            items(tracks,key={it.id}) { track ->
+                Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(13.dp)).background(Color(0xFF211B36)).clickable{onToggle(track)}.padding(horizontal=12.dp,vertical=9.dp),verticalAlignment=Alignment.CenterVertically) {
+                    Icon(if(track.id in hidden)Icons.Default.VisibilityOff else Icons.Default.MusicNote,null,tint=Color(0xFFFF5EA8))
+                    Spacer(Modifier.width(10.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(track.title,color=Color.White,maxLines=1,overflow=TextOverflow.Ellipsis)
+                        Text(track.artist,color=Color(0xFFB8B0CE),fontSize=11.sp,maxLines=1,overflow=TextOverflow.Ellipsis)
+                    }
+                    Switch(checked=track.id in hidden,onCheckedChange={onToggle(track)},colors=SwitchDefaults.colors(checkedThumbColor=Color(0xFFFF2384)))
+                }
+            }
+        }
+    }
+}
