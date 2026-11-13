@@ -2,6 +2,7 @@ package com.vibe.music
 
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -18,6 +19,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.graphicsLayer
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
@@ -109,3 +111,34 @@ fun VibePlayerScreen(
  }
 }
 
+
+
+@Composable
+internal fun DancingPet(playing:Boolean) {
+    val dance = rememberInfiniteTransition(label="vibe-pet-dance")
+    val bounce by dance.animateFloat(
+        initialValue=0f, targetValue=1f,
+        animationSpec=infiniteRepeatable(tween(if(playing)190 else 900, easing=FastOutSlowInEasing), RepeatMode.Reverse),
+        label="pet-bounce"
+    )
+    val sway by dance.animateFloat(
+        initialValue=-7f, targetValue=7f,
+        animationSpec=infiniteRepeatable(tween(if(playing)260 else 1200, easing=FastOutSlowInEasing), RepeatMode.Reverse),
+        label="pet-sway"
+    )
+    Box(
+        Modifier.size(88.dp).graphicsLayer {
+            translationY = if(playing) -bounce*10f else -2f
+            rotationZ = if(playing) sway else 0f
+            scaleX = 1f + if(playing) bounce*.035f else 0f
+            scaleY = 1f + if(playing) bounce*.035f else 0f
+        },
+        contentAlignment=Alignment.Center
+    ) {
+        Box(Modifier.size(78.dp).clip(RoundedCornerShape(26.dp)).background(Brush.radialGradient(listOf(Color(0x66FF168A),Color(0x00100612)))),contentAlignment=Alignment.Center) {
+            Text("🐶",fontSize=57.sp)
+            Icon(Icons.Default.Headphones,null,tint=Color(0xFFFF55B5),modifier=Modifier.align(Alignment.TopCenter).padding(top=1.dp).size(23.dp))
+        }
+        if(playing) Text("♪",color=Color(0xFFFF78C4),fontSize=20.sp,fontWeight=FontWeight.Black,modifier=Modifier.align(Alignment.TopEnd))
+    }
+}
