@@ -1,6 +1,6 @@
 package com.vibe.music
 
-import androidx.compose.foundation.*
+import android.graphics.Bitmap\nimport android.media.MediaMetadataRetriever\nimport androidx.compose.foundation.*\nimport androidx.compose.ui.graphics.asImageBitmap\nimport androidx.compose.ui.layout.ContentScale\nimport kotlinx.coroutines.Dispatchers\nimport kotlinx.coroutines.withContext
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -39,7 +39,7 @@ private fun vibePalette(theme:String):List<Color> = when(theme){
 
 @Composable
 fun VibePlayerScreen(
- theme:String,player:androidx.media3.session.MediaController?,track:Track?,position:Long,duration:Long,playing:Boolean,shuffle:Boolean,repeat:Int,audioOnly:Boolean,lyrics:String,loading:Boolean,
+ theme:String,playerStyle:String,player:androidx.media3.session.MediaController?,track:Track?,position:Long,duration:Long,playing:Boolean,shuffle:Boolean,repeat:Int,audioOnly:Boolean,lyrics:String,loading:Boolean,
  loadLyrics:()->Unit,seek:(Long)->Unit,previous:()->Unit,next:()->Unit,toggle:()->Unit,toggleShuffle:()->Unit,toggleRepeat:()->Unit,toggleAudio:()->Unit,close:()->Unit
 ){
  var lyricsPage by remember{mutableStateOf(false)}
@@ -55,7 +55,7 @@ fun VibePlayerScreen(
     Box(Modifier.fillMaxWidth().height(330.dp),contentAlignment=Alignment.Center){
      Box(Modifier.size(300.dp).clip(RoundedCornerShape(50)).background(Brush.radialGradient(listOf(Color(0xFFFFC5B7),palette[0],Color(0xFF21051D)))),contentAlignment=Alignment.Center){
       Box(Modifier.size(246.dp).clip(RoundedCornerShape(50)).background(Brush.radialGradient(listOf(Color(0xFF17121F),Color(0xFF3D164B),Color(0xFF100916)))),contentAlignment=Alignment.Center){
-       Box(Modifier.size(168.dp).clip(RoundedCornerShape(50)).background(Brush.linearGradient(listOf(Color(0xFFFFE1D1),Color(0xFFFF4E9C),Color(0xFF6520A2)))),contentAlignment=Alignment.Center){Icon(Icons.Default.Album,null,tint=Color.White,modifier=Modifier.size(90.dp))}
+       Box(Modifier.size(168.dp).clip(if(playerStyle=="Round"||playerStyle=="Rose Vinyl")RoundedCornerShape(50) else RoundedCornerShape(24.dp)).background(Brush.linearGradient(listOf(Color(0xFFFFE1D1),Color(0xFFFF4E9C),Color(0xFF6520A2)))),contentAlignment=Alignment.Center){if(artwork!=null)Image(artwork!!.asImageBitmap(),contentDescription="Album artwork",modifier=Modifier.fillMaxSize(),contentScale=ContentScale.Crop)else Icon(Icons.Default.Album,null,tint=Color.White,modifier=Modifier.size(90.dp))}
       }
      }
     }
