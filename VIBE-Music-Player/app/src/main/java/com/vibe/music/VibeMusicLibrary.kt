@@ -22,7 +22,7 @@ internal fun VibeMusicLibrary(
     songs: List<Track>, videos: List<Track>, favourites: Set<Long>,
     playlists: Map<String, Set<Long>>, playingTrack: Track?,
     onPlay: (Track) -> Unit, onFavourite: (Track) -> Unit,
-    onCreatePlaylist: () -> Unit, onOpenPlayer: () -> Unit
+    onCreatePlaylist: () -> Unit, onOpenPlayer: () -> Unit, onProfile: () -> Unit
 ) {
     var tab by remember { mutableIntStateOf(1) }
     var sortNewest by remember { mutableStateOf(false) }; var searchOpen by remember { mutableStateOf(false) }; var query by remember { mutableStateOf("") }
@@ -43,7 +43,7 @@ internal fun VibeMusicLibrary(
                     Spacer(Modifier.weight(1f))
                     IconButton(onClick={searchOpen=!searchOpen}) { Icon(Icons.Default.Search, "Search", tint=Color.White, modifier=Modifier.size(25.dp)) }
                     Spacer(Modifier.width(14.dp))
-                    IconButton(onClick=onOpenPlayer) { Icon(Icons.Default.AccountCircle, "Profile", tint=Color.White, modifier=Modifier.size(26.dp)) }
+                    IconButton(onClick=onProfile) { Icon(Icons.Default.AccountCircle, "Profile", tint=Color.White, modifier=Modifier.size(26.dp)) }
                 }
                 Spacer(Modifier.height(14.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.SpaceBetween) {
