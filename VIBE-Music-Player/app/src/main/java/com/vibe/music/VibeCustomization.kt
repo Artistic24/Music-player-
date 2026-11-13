@@ -30,7 +30,7 @@ private val vibeThemes=listOf(
 )
 private val vibeStyles=listOf("Top","Static","Dynamic","Spin Vinyl","Round")
 
-@Composable internal fun VibeProfilePage(theme:String,style:String,onTheme:(String)->Unit,onStyle:(String)->Unit,onFix:()->Unit,onSettings:()->Unit){
+@Composable internal fun VibeProfilePage(theme:String,style:String,onTheme:(String)->Unit,onStyle:(String)->Unit,onFix:()->Unit,onHideScan:()->Unit,petEnabled:Boolean,onPetToggle:(Boolean)->Unit,onSettings:()->Unit){
  LazyColumn(Modifier.fillMaxSize(),contentPadding=PaddingValues(horizontal=14.dp,vertical=12.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){
   item{Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(Brush.linearGradient(listOf(Color(0xFFFF7900),Color(0xFFEC008C),Color(0xFF3210A8)))).padding(18.dp),verticalAlignment=Alignment.CenterVertically){Box(Modifier.size(58.dp).clip(RoundedCornerShape(18.dp)).background(Color(0xFF160A24)),contentAlignment=Alignment.Center){Icon(Icons.Default.Album,null,tint=Color.White,modifier=Modifier.size(40.dp))};Spacer(Modifier.width(13.dp));Column{Text("VIBE",color=Color.White,fontSize=25.sp,fontWeight=FontWeight.Black);Text("Your music. Your world.",color=Color.White.copy(alpha=.85f),fontSize=12.sp)}}}
   item{Text("PLAYER STYLE",color=Color.White,fontWeight=FontWeight.Bold,letterSpacing=1.4.sp)}
@@ -56,7 +56,9 @@ private val vibeStyles=listOf("Top","Static","Dynamic","Spin Vinyl","Round")
     }
    }
   }
-  item{Text("MUSIC TOOLS",color=Color.White,fontWeight=FontWeight.Bold,letterSpacing=1.4.sp);ProfileAction(Icons.Default.AutoFixHigh,"Fix song info","Correct titles and artists, with undo",onFix);ProfileAction(Icons.Default.Settings,"Settings","More playback and library settings",onSettings)}
+  item{Text("MUSIC TOOLS",color=Color.White,fontWeight=FontWeight.Bold,letterSpacing=1.4.sp);ProfileAction(Icons.Default.AutoFixHigh,"Fix song info","Correct titles and artists, with undo",onFix);ProfileAction(Icons.Default.VisibilityOff,"Hide & Scan","Hide selected tracks from your VIBE library",onHideScan)}
+  item{Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(15.dp)).background(Color(0xFF211B36)).padding(13.dp),verticalAlignment=Alignment.CenterVertically){Icon(Icons.Default.Pets,null,tint=Color(0xFFFF2D83),modifier=Modifier.size(26.dp));Spacer(Modifier.width(12.dp));Column(Modifier.weight(1f)){Text("Music Pet",color=Color.White,fontWeight=FontWeight.SemiBold);Text("Let your headphone puppy dance to the beat",color=Color(0xFFB8B0CE),fontSize=10.sp)};Switch(checked=petEnabled,onCheckedChange=onPetToggle,colors=SwitchDefaults.colors(checkedThumbColor=Color(0xFFFF2D83)))}}
+  item{ProfileAction(Icons.Default.Settings,"Settings","More playback and library settings",onSettings)}
  }
 }
 @Composable private fun ProfileAction(icon:androidx.compose.ui.graphics.vector.ImageVector,title:String,subtitle:String,click:()->Unit){Row(Modifier.fillMaxWidth().padding(vertical=4.dp).clip(RoundedCornerShape(15.dp)).background(Color(0xFF211B36)).clickable(onClick=click).padding(13.dp),verticalAlignment=Alignment.CenterVertically){Icon(icon,null,tint=Color(0xFFFF2D83),modifier=Modifier.size(26.dp));Spacer(Modifier.width(12.dp));Column(Modifier.weight(1f)){Text(title,color=Color.White,fontWeight=FontWeight.SemiBold);Text(subtitle,color=Color(0xFFB8B0CE),fontSize=10.sp)};Icon(Icons.Default.ChevronRight,null,tint=Color.LightGray)}}
