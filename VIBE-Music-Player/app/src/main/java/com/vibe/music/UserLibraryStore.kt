@@ -30,6 +30,8 @@ class UserLibraryStore(context: Context) {
         metadataOverrides().filterKeys { it != id }.forEach { (key, value) -> j.put(key.toString(), JSONObject().put("title", value.first).put("artist", value.second)) }
         prefs.edit().putString("metadata_overrides", j.toString()).apply()
     }
+    fun hiddenTracks(): Set<Long> = prefs.getStringSet("hidden_tracks", emptySet())?.mapNotNull { it.toLongOrNull() }?.toSet() ?: emptySet()
+    fun toggleHiddenTrack(id: Long): Set<Long> { val s=hiddenTracks().toMutableSet(); if(!s.add(id)) s.remove(id); prefs.edit().putStringSet("hidden_tracks",s.map{it.toString()}.toSet()).apply(); return s }
     fun setting(key: String, fallback: String): String = prefs.getString(key, fallback) ?: fallback
     fun saveSetting(key: String, value: String) { prefs.edit().putString(key, value).apply() }
     fun lyrics(key: String): String? = prefs.getString("lyrics_$key", null)
